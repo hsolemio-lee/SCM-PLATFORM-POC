@@ -15,6 +15,8 @@ interface SCMContextType {
   setExpandedLog: (stage: SolverStage | null) => void;
   selectedSolver: Record<SolverStage, string>;
   setSelectedSolver: (stage: SolverStage, solverId: string) => void;
+  runAllSolvers: () => void;
+  isRunningAll: boolean;
 }
 
 const SCMContext = createContext<SCMContextType | null>(null);
@@ -51,6 +53,8 @@ export function SCMProvider({ children }: SCMProviderProps) {
   const [expandedLog, setExpandedLog] = useState<SolverStage | null>(null);
 
   const [selectedSolver, setSelectedSolverState] = useState<Record<SolverStage, string>>(defaultSolvers);
+
+  const [isRunningAll, setIsRunningAll] = useState(false);
 
   const setSelectedSolver = useCallback((stage: SolverStage, solverId: string) => {
     setSelectedSolverState(prev => ({ ...prev, [stage]: solverId }));
@@ -129,6 +133,37 @@ export function SCMProvider({ children }: SCMProviderProps) {
     setExpandedLog(null);
   }, []);
 
+  const runAllSolvers = useCallback(() => {
+    if (isRunningAll) return;
+
+    setIsRunningAll(true);
+
+    const stages: SolverStage[] = ['dp', 'mp', 'fp', 'tp'];
+    let currentIndex = 0;
+
+    const runNextStage = () => {
+      if (currentIndex >= stages.length) {
+        setIsRunningAll(false);
+        return;
+      }
+
+      const stage = stages[currentIndex];
+
+      // Set up completion listener
+      const checkCompletion = setInterval(() => {
+        if (!runningRef.current[stage]) {
+          clearInterval(checkCompletion);
+          currentIndex++;
+          setTimeout(runNextStage, 500); // Small delay before next
+        }
+      }, 100);
+
+      runSolver(stage);
+    };
+
+    runNextStage();
+  }, [isRunningAll, runSolver]);
+
   return (
     <SCMContext.Provider
       value={{
@@ -142,6 +177,8 @@ export function SCMProvider({ children }: SCMProviderProps) {
         setExpandedLog,
         selectedSolver,
         setSelectedSolver,
+        runAllSolvers,
+        isRunningAll,
       }}
     >
       {children}
