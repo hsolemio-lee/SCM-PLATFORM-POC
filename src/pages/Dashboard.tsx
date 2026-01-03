@@ -1,11 +1,12 @@
 // src/pages/Dashboard.tsx
 import { useState, useEffect } from 'react';
-import { Play } from 'lucide-react';
 import { SolverStage } from '../types';
 import { useSCM } from '../context/SCMContext';
 import { stageOrder } from '../mocks/data';
+import PipelineSummary from '../components/dashboard/PipelineSummary';
 import SolverCard from '../components/dashboard/SolverCard';
 import MainSolverView from '../components/dashboard/MainSolverView';
+import ActivityTimeline from '../components/dashboard/ActivityTimeline';
 
 export default function Dashboard() {
   const {
@@ -13,8 +14,6 @@ export default function Dashboard() {
     logs,
     runSolver,
     canRunSolver,
-    runAllSolvers,
-    isRunningAll,
   } = useSCM();
 
   const [selectedStage, setSelectedStage] = useState<SolverStage>('dp');
@@ -31,33 +30,19 @@ export default function Dashboard() {
 
   return (
     <div className="h-[calc(100vh-120px)]">
-      {/* Run All Button */}
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={runAllSolvers}
-          disabled={isRunningAll}
-          className={`
-            flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-colors
-            ${!isRunningAll
-              ? 'bg-gradient-to-r from-nexprime-cyan to-nexprime-blue text-nexprime-darker hover:opacity-90'
-              : 'bg-white/10 text-white/30 cursor-not-allowed'
-            }
-          `}
-        >
-          <Play size={18} />
-          {isRunningAll ? 'Running Pipeline...' : 'Run All Pipeline'}
-        </button>
-      </div>
+      {/* Pipeline Summary Header */}
+      <PipelineSummary />
 
       {/* Main Layout */}
-      <div className="flex gap-4 h-full">
+      <div className="flex gap-4 h-[calc(100%-100px)]">
         {/* Main Area */}
         <div className="flex-1 min-w-0">
           <MainSolverView stage={selectedStage} />
         </div>
 
         {/* Sidebar */}
-        <div className="w-64 space-y-3 flex-shrink-0">
+        <div className="w-64 flex flex-col gap-3 flex-shrink-0">
+          {/* Solver Cards */}
           {sidebarStages.map(stage => (
             <SolverCard
               key={stage}
@@ -70,6 +55,11 @@ export default function Dashboard() {
               onRun={() => runSolver(stage)}
             />
           ))}
+
+          {/* Activity Timeline */}
+          <div className="mt-auto">
+            <ActivityTimeline />
+          </div>
         </div>
       </div>
     </div>
