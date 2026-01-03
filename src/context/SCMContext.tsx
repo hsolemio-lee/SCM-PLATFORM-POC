@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react';
 import { SolverStage, SolverStatus, LogEntry, SolverOutputs } from '../types';
 import { mockSolverOutputs, stageOrder } from '../mocks/data';
+import { defaultSolvers } from '../mocks/solvers';
 import { solverLogMessages } from '../mocks/logs';
 
 interface SCMContextType {
@@ -12,6 +13,8 @@ interface SCMContextType {
   resetDemo: () => void;
   expandedLog: SolverStage | null;
   setExpandedLog: (stage: SolverStage | null) => void;
+  selectedSolver: Record<SolverStage, string>;
+  setSelectedSolver: (stage: SolverStage, solverId: string) => void;
 }
 
 const SCMContext = createContext<SCMContextType | null>(null);
@@ -47,6 +50,12 @@ export function SCMProvider({ children }: SCMProviderProps) {
 
   const [expandedLog, setExpandedLog] = useState<SolverStage | null>(null);
 
+  const [selectedSolver, setSelectedSolverState] = useState<Record<SolverStage, string>>(defaultSolvers);
+
+  const setSelectedSolver = useCallback((stage: SolverStage, solverId: string) => {
+    setSelectedSolverState(prev => ({ ...prev, [stage]: solverId }));
+  }, []);
+
   const runningRef = useRef<Record<SolverStage, boolean>>({
     dp: false,
     mp: false,
@@ -71,7 +80,7 @@ export function SCMProvider({ children }: SCMProviderProps) {
     setSolverStatus(prev => ({ ...prev, [stage]: 'running' }));
     setExpandedLog(stage);
 
-    const messages = solverLogMessages[stage];
+    const messages = solverLogMessages[stage][selectedSolver[stage]] || [];
     let index = 0;
 
     const streamLog = () => {
@@ -104,7 +113,7 @@ export function SCMProvider({ children }: SCMProviderProps) {
     };
 
     streamLog();
-  }, [canRunSolver]);
+  }, [canRunSolver, selectedSolver]);
 
   const resetDemo = useCallback(() => {
     Object.keys(runningRef.current).forEach(key => {
@@ -131,6 +140,8 @@ export function SCMProvider({ children }: SCMProviderProps) {
         resetDemo,
         expandedLog,
         setExpandedLog,
+        selectedSolver,
+        setSelectedSolver,
       }}
     >
       {children}
