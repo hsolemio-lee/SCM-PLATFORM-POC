@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Home } from 'lucide-react';
 import { useSCM } from '../../context/SCMContext';
 import { stageOrder, stageLabels } from '../../mocks/data';
 import { SolverStage } from '../../types';
@@ -45,13 +46,26 @@ export default function Header() {
     <header className="bg-nexprime-dark border-b border-nexprime-blue/30">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <span className="text-nexprime-cyan font-bold text-xl tracking-wider">
-              NEXPRIME
-            </span>
-            <span className="text-white/60 text-sm">SCM</span>
-          </div>
+          {/* Logo with Dashboard Link */}
+          <NavLink to="/" className="flex items-center gap-3 group">
+            <div className={`
+              p-2 rounded-lg transition-colors
+              ${location.pathname === '/'
+                ? 'bg-nexprime-cyan/20 text-nexprime-cyan'
+                : 'text-white/40 hover:text-white/60 hover:bg-white/5'
+              }
+            `}>
+              <Home size={20} />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-nexprime-cyan font-bold text-xl tracking-wider group-hover:text-nexprime-cyan/80 transition-colors">
+                NEXPRIME
+              </span>
+              <span className="text-white/60 text-sm group-hover:text-white/80 transition-colors">
+                SCM
+              </span>
+            </div>
+          </NavLink>
 
           {/* Pipeline Navigation */}
           <nav className="flex items-center gap-2">
