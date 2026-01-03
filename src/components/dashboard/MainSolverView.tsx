@@ -5,7 +5,7 @@ import { useSCM } from '../../context/SCMContext';
 import { stageLabels } from '../../mocks/data';
 import { solverOptions } from '../../mocks/solvers';
 import CompactKPIs from './CompactKPIs';
-import CompactVisualization from './CompactVisualization';
+import OutputPanel from './OutputPanel';
 import LiveSolverLog from '../common/LiveSolverLog';
 
 interface MainSolverViewProps {
@@ -50,20 +50,21 @@ export default function MainSolverView({ stage }: MainSolverViewProps) {
       {/* Compact KPIs */}
       <CompactKPIs stage={stage} />
 
-      {/* Compact Visualization */}
-      <div className="bg-nexprime-dark border border-nexprime-blue/30 rounded-lg p-3">
-        <CompactVisualization stage={stage} />
-      </div>
+      {/* Two Column Layout: Chart/Table + Log */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Left: Output Panel (Chart/Table) */}
+        <OutputPanel stage={stage} />
 
-      {/* Large Log Area */}
-      <div className="flex-1">
-        <LiveSolverLog
-          stage={stage}
-          logs={logs[stage]}
-          status={status}
-          isExpanded={true}
-          onToggle={() => {}}
-        />
+        {/* Right: Live Log */}
+        <div className="h-80">
+          <LiveSolverLog
+            stage={stage}
+            logs={logs[stage]}
+            status={status}
+            isExpanded={true}
+            onToggle={() => {}}
+          />
+        </div>
       </div>
     </div>
   );
