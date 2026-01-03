@@ -29,10 +29,12 @@ export default function SupplyDemandChart({ data }: SupplyDemandChartProps) {
               borderRadius: '8px',
             }}
             labelStyle={{ color: '#ffffff' }}
-            formatter={(value: number, name: string) => [
-              value.toLocaleString(),
-              name.charAt(0).toUpperCase() + name.slice(1)
-            ]}
+            formatter={(value, name) => {
+              const formattedValue = typeof value === 'number' ? value.toLocaleString() : '0';
+              const nameStr = String(name || '');
+              const formattedName = nameStr ? nameStr.charAt(0).toUpperCase() + nameStr.slice(1) : '';
+              return [formattedValue, formattedName];
+            }}
           />
           <Legend />
           <Bar dataKey="supply" fill="#00FFFF" name="Supply" radius={[4, 4, 0, 0]} />
