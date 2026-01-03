@@ -13,7 +13,7 @@ interface MainSolverViewProps {
 }
 
 export default function MainSolverView({ stage }: MainSolverViewProps) {
-  const { solverStatus, logs, runSolver, canRunSolver, selectedSolver, expandedLog, setExpandedLog } = useSCM();
+  const { solverStatus, logs, runSolver, canRunSolver, selectedSolver } = useSCM();
 
   const status = solverStatus[stage];
   const currentSolver = solverOptions[stage].find(s => s.id === selectedSolver[stage]);
