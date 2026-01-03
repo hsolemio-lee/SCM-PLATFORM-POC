@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { SCMProvider } from './context/SCMContext';
 import Header from './components/layout/Header';
 import FloatingRunButton from './components/layout/FloatingRunButton';
+import Dashboard from './pages/Dashboard';
 import DemandPlanning from './pages/DemandPlanning';
 import MasterPlanning from './pages/MasterPlanning';
 import FactoryPlanning from './pages/FactoryPlanning';
@@ -15,7 +16,7 @@ function App() {
           <Header />
           <main className="container mx-auto px-4 py-6">
             <Routes>
-              <Route path="/" element={<Navigate to="/dp" replace />} />
+              <Route path="/" element={<Dashboard />} />
               <Route path="/dp" element={<DemandPlanning />} />
               <Route path="/mp" element={<MasterPlanning />} />
               <Route path="/fp" element={<FactoryPlanning />} />
