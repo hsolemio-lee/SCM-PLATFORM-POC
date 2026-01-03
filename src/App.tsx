@@ -1,16 +1,32 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { SCMProvider } from './context/SCMContext';
+import Header from './components/layout/Header';
+import FloatingRunButton from './components/layout/FloatingRunButton';
+import DemandPlanning from './pages/DemandPlanning';
+import MasterPlanning from './pages/MasterPlanning';
+import FactoryPlanning from './pages/FactoryPlanning';
+import TransportPlanning from './pages/TransportPlanning';
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-nexprime-cyan mb-4">
-          Nexprime SCM
-        </h1>
-        <p className="text-gray-400">
-          Integrated SCM Platform POC
-        </p>
-      </div>
-    </div>
-  )
+    <SCMProvider>
+      <BrowserRouter>
+        <div className="min-h-screen bg-nexprime-darker">
+          <Header />
+          <main className="container mx-auto px-4 py-6">
+            <Routes>
+              <Route path="/" element={<Navigate to="/dp" replace />} />
+              <Route path="/dp" element={<DemandPlanning />} />
+              <Route path="/mp" element={<MasterPlanning />} />
+              <Route path="/fp" element={<FactoryPlanning />} />
+              <Route path="/tp" element={<TransportPlanning />} />
+            </Routes>
+          </main>
+          <FloatingRunButton />
+        </div>
+      </BrowserRouter>
+    </SCMProvider>
+  );
 }
 
-export default App
+export default App;
