@@ -1,14 +1,36 @@
+// src/pages/TransportPlanning.tsx
+import { useState } from 'react';
 import { useSCM } from '../context/SCMContext';
 import KPICard from '../components/common/KPICard';
 import LiveSolverLog from '../components/common/LiveSolverLog';
 import RouteMap from '../components/visualizations/RouteMap';
+import SolverSelector from '../components/common/SolverSelector';
+import DataTabs from '../components/common/DataTabs';
+import DataTable from '../components/common/DataTable';
+import { solverOptions } from '../mocks/solvers';
+import { stageTableData } from '../mocks/tableData';
 
 export default function TransportPlanning() {
-  const { solverOutputs, solverStatus, logs, expandedLog, setExpandedLog } = useSCM();
+  const { solverOutputs, solverStatus, logs, expandedLog, setExpandedLog, selectedSolver, setSelectedSolver } = useSCM();
   const { routes, kpis } = solverOutputs.tp;
+  const [activeTab, setActiveTab] = useState<'input' | 'output'>('output');
+
+  const tableData = stageTableData.tp;
+  const isRunning = solverStatus.tp === 'running';
 
   return (
     <div className="space-y-6">
+      {/* Solver Selection & Tabs */}
+      <div className="flex items-center justify-between">
+        <SolverSelector
+          options={solverOptions.tp}
+          selectedId={selectedSolver.tp}
+          onSelect={(id) => setSelectedSolver('tp', id)}
+          disabled={isRunning}
+        />
+        <DataTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <KPICard
@@ -39,8 +61,15 @@ export default function TransportPlanning() {
         />
       </div>
 
-      {/* Main Visualization */}
-      <RouteMap data={routes} />
+      {/* Main Content */}
+      {activeTab === 'output' ? (
+        <RouteMap data={routes} />
+      ) : (
+        <DataTable
+          data={tableData.input}
+          columns={tableData.inputColumns}
+        />
+      )}
 
       {/* Live Solver Log */}
       <LiveSolverLog

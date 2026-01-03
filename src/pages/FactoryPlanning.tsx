@@ -1,14 +1,36 @@
+// src/pages/FactoryPlanning.tsx
+import { useState } from 'react';
 import { useSCM } from '../context/SCMContext';
 import KPICard from '../components/common/KPICard';
 import LiveSolverLog from '../components/common/LiveSolverLog';
 import GanttChart from '../components/visualizations/GanttChart';
+import SolverSelector from '../components/common/SolverSelector';
+import DataTabs from '../components/common/DataTabs';
+import DataTable from '../components/common/DataTable';
+import { solverOptions } from '../mocks/solvers';
+import { stageTableData } from '../mocks/tableData';
 
 export default function FactoryPlanning() {
-  const { solverOutputs, solverStatus, logs, expandedLog, setExpandedLog } = useSCM();
+  const { solverOutputs, solverStatus, logs, expandedLog, setExpandedLog, selectedSolver, setSelectedSolver } = useSCM();
   const { schedule, kpis } = solverOutputs.fp;
+  const [activeTab, setActiveTab] = useState<'input' | 'output'>('output');
+
+  const tableData = stageTableData.fp;
+  const isRunning = solverStatus.fp === 'running';
 
   return (
     <div className="space-y-6">
+      {/* Solver Selection & Tabs */}
+      <div className="flex items-center justify-between">
+        <SolverSelector
+          options={solverOptions.fp}
+          selectedId={selectedSolver.fp}
+          onSelect={(id) => setSelectedSolver('fp', id)}
+          disabled={isRunning}
+        />
+        <DataTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <KPICard
@@ -39,8 +61,15 @@ export default function FactoryPlanning() {
         />
       </div>
 
-      {/* Main Visualization */}
-      <GanttChart data={schedule} />
+      {/* Main Content */}
+      {activeTab === 'output' ? (
+        <GanttChart data={schedule} />
+      ) : (
+        <DataTable
+          data={tableData.input}
+          columns={tableData.inputColumns}
+        />
+      )}
 
       {/* Live Solver Log */}
       <LiveSolverLog

@@ -1,14 +1,36 @@
+// src/pages/MasterPlanning.tsx
+import { useState } from 'react';
 import { useSCM } from '../context/SCMContext';
 import KPICard from '../components/common/KPICard';
 import LiveSolverLog from '../components/common/LiveSolverLog';
 import SupplyDemandChart from '../components/visualizations/SupplyDemandChart';
+import SolverSelector from '../components/common/SolverSelector';
+import DataTabs from '../components/common/DataTabs';
+import DataTable from '../components/common/DataTable';
+import { solverOptions } from '../mocks/solvers';
+import { stageTableData } from '../mocks/tableData';
 
 export default function MasterPlanning() {
-  const { solverOutputs, solverStatus, logs, expandedLog, setExpandedLog } = useSCM();
+  const { solverOutputs, solverStatus, logs, expandedLog, setExpandedLog, selectedSolver, setSelectedSolver } = useSCM();
   const { plans, kpis } = solverOutputs.mp;
+  const [activeTab, setActiveTab] = useState<'input' | 'output'>('output');
+
+  const tableData = stageTableData.mp;
+  const isRunning = solverStatus.mp === 'running';
 
   return (
     <div className="space-y-6">
+      {/* Solver Selection & Tabs */}
+      <div className="flex items-center justify-between">
+        <SolverSelector
+          options={solverOptions.mp}
+          selectedId={selectedSolver.mp}
+          onSelect={(id) => setSelectedSolver('mp', id)}
+          disabled={isRunning}
+        />
+        <DataTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <KPICard
@@ -38,8 +60,15 @@ export default function MasterPlanning() {
         />
       </div>
 
-      {/* Main Visualization */}
-      <SupplyDemandChart data={plans} />
+      {/* Main Content */}
+      {activeTab === 'output' ? (
+        <SupplyDemandChart data={plans} />
+      ) : (
+        <DataTable
+          data={tableData.input}
+          columns={tableData.inputColumns}
+        />
+      )}
 
       {/* Live Solver Log */}
       <LiveSolverLog
