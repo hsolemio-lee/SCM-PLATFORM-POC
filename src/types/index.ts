@@ -55,3 +55,16 @@ export interface SolverOutputs {
   fp: { schedule: ProductionScheduleItem[]; kpis: SolverKPIs['fp'] };
   tp: { routes: TransportRoute[]; kpis: SolverKPIs['tp'] };
 }
+
+export interface SolverOption {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface StageTableData {
+  input: Record<string, unknown>[];
+  output: Record<string, unknown>[];
+  inputColumns: { key: string; label: string }[];
+  outputColumns: { key: string; label: string }[];
+}
