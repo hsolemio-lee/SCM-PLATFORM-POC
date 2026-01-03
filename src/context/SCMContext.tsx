@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react';
-import { SolverStage, SolverStatus, LogEntry, SolverOutputs } from '../types';
+import { SolverStage, SolverStatus, LogEntry, SolverOutputs, ActivityEvent } from '../types';
 import { mockSolverOutputs, stageOrder } from '../mocks/data';
 import { defaultSolvers } from '../mocks/solvers';
 import { solverLogMessages } from '../mocks/logs';
@@ -17,6 +17,7 @@ interface SCMContextType {
   setSelectedSolver: (stage: SolverStage, solverId: string) => void;
   runAllSolvers: () => void;
   isRunningAll: boolean;
+  activityLog: ActivityEvent[];
 }
 
 const SCMContext = createContext<SCMContextType | null>(null);
@@ -56,6 +57,18 @@ export function SCMProvider({ children }: SCMProviderProps) {
 
   const [isRunningAll, setIsRunningAll] = useState(false);
 
+  const [activityLog, setActivityLog] = useState<ActivityEvent[]>([]);
+
+  const addActivityEvent = useCallback((stage: SolverStage, type: 'start' | 'complete') => {
+    const event: ActivityEvent = {
+      id: `${stage}-${type}-${Date.now()}`,
+      stage,
+      type,
+      timestamp: new Date(),
+    };
+    setActivityLog(prev => [event, ...prev].slice(0, 10)); // Keep max 10 events
+  }, []);
+
   const setSelectedSolver = useCallback((stage: SolverStage, solverId: string) => {
     setSelectedSolverState(prev => ({ ...prev, [stage]: solverId }));
   }, []);
@@ -82,6 +95,7 @@ export function SCMProvider({ children }: SCMProviderProps) {
     // Clear previous logs and set running
     setLogs(prev => ({ ...prev, [stage]: [] }));
     setSolverStatus(prev => ({ ...prev, [stage]: 'running' }));
+    addActivityEvent(stage, 'start');
     setExpandedLog(stage);
 
     const messages = solverLogMessages[stage][selectedSolver[stage]] || [];
@@ -90,6 +104,7 @@ export function SCMProvider({ children }: SCMProviderProps) {
     const streamLog = () => {
       if (index >= messages.length) {
         setSolverStatus(prev => ({ ...prev, [stage]: 'complete' }));
+        addActivityEvent(stage, 'complete');
         runningRef.current[stage] = false;
         return;
       }
@@ -117,7 +132,7 @@ export function SCMProvider({ children }: SCMProviderProps) {
     };
 
     streamLog();
-  }, [canRunSolver, selectedSolver]);
+  }, [canRunSolver, selectedSolver, addActivityEvent]);
 
   const resetDemo = useCallback(() => {
     Object.keys(runningRef.current).forEach(key => {
@@ -131,6 +146,7 @@ export function SCMProvider({ children }: SCMProviderProps) {
     });
     setLogs({ dp: [], mp: [], fp: [], tp: [] });
     setExpandedLog(null);
+    setActivityLog([]);
   }, []);
 
   const runAllSolvers = useCallback(() => {
@@ -179,6 +195,7 @@ export function SCMProvider({ children }: SCMProviderProps) {
         setSelectedSolver,
         runAllSolvers,
         isRunningAll,
+        activityLog,
       }}
     >
       {children}

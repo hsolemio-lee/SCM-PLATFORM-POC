@@ -68,3 +68,10 @@ export interface StageTableData {
   inputColumns: { key: string; label: string }[];
   outputColumns: { key: string; label: string }[];
 }
+
+export interface ActivityEvent {
+  id: string;
+  stage: SolverStage;
+  type: 'start' | 'complete';
+  timestamp: Date;
+}
