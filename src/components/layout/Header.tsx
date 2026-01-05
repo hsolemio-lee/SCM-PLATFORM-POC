@@ -103,14 +103,21 @@ export default function Header() {
                 {/* Connector Line */}
                 {index < stageOrder.length - 1 && (
                   <div className="w-12 h-0.5 mx-2 relative">
-                    <div className="absolute inset-0 bg-nexprime-cyan/20" />
-                    {solverStatus[stage] === 'complete' && (
-                      <motion.div
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        transition={{ duration: 0.5 }}
-                        className="absolute inset-0 bg-nexprime-cyan origin-left"
-                      />
+                    {needsSync[stageOrder[index + 1]] ? (
+                      // Sync 필요: 주황 점선
+                      <div className="absolute inset-0 border-t-2 border-dashed border-orange-400" />
+                    ) : (
+                      <>
+                        <div className="absolute inset-0 bg-nexprime-cyan/20" />
+                        {solverStatus[stage] === 'complete' && (
+                          <motion.div
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{ duration: 0.5 }}
+                            className="absolute inset-0 bg-nexprime-cyan origin-left"
+                          />
+                        )}
+                      </>
                     )}
                   </div>
                 )}
