@@ -4,9 +4,10 @@ import { Home } from 'lucide-react';
 import { useSCM } from '../../context/SCMContext';
 import { stageOrder, stageLabels } from '../../mocks/data';
 import { SolverStage } from '../../types';
+import SyncBadge from '../common/SyncBadge';
 
 export default function Header() {
-  const { solverStatus, solverOutputs } = useSCM();
+  const { solverStatus, solverOutputs, needsSync, lastCompletedStage } = useSCM();
   const location = useLocation();
 
   const getBadgeCount = (stage: SolverStage): number => {
@@ -72,13 +73,19 @@ export default function Header() {
             {stageOrder.map((stage, index) => (
               <div key={stage} className="flex items-center">
                 <NavLink to={`/${stage}`} className="flex flex-col items-center gap-1">
-                  <motion.div
-                    className={getNodeClasses(stage)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {stage.toUpperCase()}
-                  </motion.div>
+                  <div className="relative">
+                    <motion.div
+                      className={getNodeClasses(stage)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {stage.toUpperCase()}
+                    </motion.div>
+                    {/* Sync Badge */}
+                    {needsSync[stage] && lastCompletedStage && (
+                      <SyncBadge triggerStage={lastCompletedStage} />
+                    )}
+                  </div>
                   <span className="text-xs text-white/40">
                     {stageLabels[stage].split(' ')[0]}
                   </span>
