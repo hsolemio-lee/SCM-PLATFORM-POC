@@ -18,6 +18,8 @@ interface SCMContextType {
   runAllSolvers: () => void;
   isRunningAll: boolean;
   activityLog: ActivityEvent[];
+  needsSync: Record<SolverStage, boolean>;
+  lastCompletedStage: SolverStage | null;
 }
 
 const SCMContext = createContext<SCMContextType | null>(null);
@@ -58,6 +60,15 @@ export function SCMProvider({ children }: SCMProviderProps) {
   const [isRunningAll, setIsRunningAll] = useState(false);
 
   const [activityLog, setActivityLog] = useState<ActivityEvent[]>([]);
+
+  const [needsSync, setNeedsSync] = useState<Record<SolverStage, boolean>>({
+    dp: false,
+    mp: false,
+    fp: false,
+    tp: false,
+  });
+
+  const [lastCompletedStage, setLastCompletedStage] = useState<SolverStage | null>(null);
 
   const addActivityEvent = useCallback((stage: SolverStage, type: 'start' | 'complete') => {
     const event: ActivityEvent = {
@@ -103,7 +114,25 @@ export function SCMProvider({ children }: SCMProviderProps) {
 
     const streamLog = () => {
       if (index >= messages.length) {
-        setSolverStatus(prev => ({ ...prev, [stage]: 'complete' }));
+        setSolverStatus(prev => {
+          const newStatus = { ...prev, [stage]: 'complete' };
+
+          // needsSync 업데이트: 이후 stage들 중 complete인 것들
+          const stageIdx = stageOrder.indexOf(stage);
+          setNeedsSync(syncPrev => {
+            const updated = { ...syncPrev, [stage]: false };
+            for (let i = stageIdx + 1; i < stageOrder.length; i++) {
+              const nextStage = stageOrder[i];
+              if (newStatus[nextStage] === 'complete') {
+                updated[nextStage] = true;
+              }
+            }
+            return updated;
+          });
+
+          setLastCompletedStage(stage);
+          return newStatus;
+        });
         addActivityEvent(stage, 'complete');
         runningRef.current[stage] = false;
         return;
@@ -147,6 +176,8 @@ export function SCMProvider({ children }: SCMProviderProps) {
     setLogs({ dp: [], mp: [], fp: [], tp: [] });
     setExpandedLog(null);
     setActivityLog([]);
+    setNeedsSync({ dp: false, mp: false, fp: false, tp: false });
+    setLastCompletedStage(null);
   }, []);
 
   const runAllSolvers = useCallback(() => {
@@ -196,6 +227,8 @@ export function SCMProvider({ children }: SCMProviderProps) {
         runAllSolvers,
         isRunningAll,
         activityLog,
+        needsSync,
+        lastCompletedStage,
       }}
     >
       {children}
